@@ -31,7 +31,7 @@ class Game:
             Player(tiles[len(tiles)//2:], False)
         ]
 
-class Controller():
+class Controller:
 
     def __init__(self):
         self.game = Game()
