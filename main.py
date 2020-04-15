@@ -7,41 +7,71 @@ BLACK = (0,0,0)
 WHITE = (255, 255, 255)
 SILVER = (192,192,192)
 
-def distribute_tiles():
-    tiles = []
-    for i in range(0,7):
-        for j in range(i,7):
-            tiles.append((i,j))
-    random.shuffle(tiles)
-    hands = [tiles[:len(tiles)//2], tiles[len(tiles)//2:]]
-    return hands
+class Tile:
 
-def draw_background(surface):
-    surface.fill(WHITE)
-    tile_width, tile_length = DIMENSIONS[0] / SQUARES_PER_ROW, DIMENSIONS[1] / SQUARES_PER_ROW
-    for x in range(0, SQUARES_PER_ROW):
-        for y in range(0, SQUARES_PER_ROW):
-            if (x + y) % 2 == 0:
-                pygame.draw.rect(surface, SILVER, [tile_width * x, tile_length * y, tile_width, tile_length]) 
+    def __init__(self, values):
+        self.values = values
+
+class Player:
+
+    def __init__(self, tiles, human):
+        self.tiles = tiles
+        self.human = human
+
+class Game:
+    
+    def __init__(self):
+        tiles = []
+        for i in range(0,7):
+            for j in range(i,7):
+                tiles.append(Tile((i,j)))
+        random.shuffle(tiles)
+        self.players = [
+            Player(tiles[:len(tiles)//2], True), 
+            Player(tiles[len(tiles)//2:], False)
+        ]
+
+class Controller():
+
+    def __init__(self):
+        self.game = Game()
+
+    def Run(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+        return True
+
+class View:
+
+    def __init__(self):
+        self.logo = pygame.image.load("domino.jpeg")
+        self.screen = pygame.display.set_mode(DIMENSIONS)
+
+        pygame.display.set_icon(self.logo)
+        pygame.display.set_caption("Dominos")
+        
+    
+    def Render(self):
+        self.screen.fill(WHITE)
+        tile_width, tile_length = DIMENSIONS[0] / SQUARES_PER_ROW, DIMENSIONS[1] / SQUARES_PER_ROW
+        for x in range(0, SQUARES_PER_ROW):
+            for y in range(0, SQUARES_PER_ROW):
+                if (x + y) % 2 == 0:
+                    pygame.draw.rect(self.screen, SILVER, [tile_width * x, tile_length * y, tile_width, tile_length]) 
+        pygame.display.update()
 
 def main():
     pygame.init()
-    logo = pygame.image.load("domino.jpeg")
-    pygame.display.set_icon(logo)
-    pygame.display.set_caption("Dominos")
-    screen = pygame.display.set_mode(DIMENSIONS)
-
-    draw_background(screen)
-    hands = distribute_tiles()
-    player_tiles, computer_tiles = hands[0], hands[1]
+    controller = Controller()
+    view = View()
 
     running = True
-
+    
     while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-        pygame.display.update()
+        if not controller.Run():
+            return
+        view.Render()
 
 if __name__=="__main__":
     main()

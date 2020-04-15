@@ -6,6 +6,7 @@ A game that I'm making in order to learn python. Play dominos against a computer
 
 * [x] Renders board
 * [x] Deals tiles randomly
+* [ ] Renders pieces played
 * [ ] Autoplays 6x6 as first move
 * [ ] Allows legal moves
 * [ ] Computer player makes moves (random selection)
