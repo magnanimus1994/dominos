@@ -14,6 +14,5 @@ class EventManager:
             del self.listeners[listener]
 
     def Post(self, event):
-        if isinstance(event, TickEvent):
-            for listener in self.listeners:
-                listener.Notify(event)
+        for listener in self.listeners:
+            listener.Notify(event)

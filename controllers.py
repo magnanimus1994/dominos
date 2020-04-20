@@ -27,7 +27,7 @@ class MouseController:
             for event in pygame.event.get():
                 notification = None
                 if event.type == pygame.QUIT:
-                    notification = QuitEvent
+                    notification = QuitEvent()
 
                 if notification:
                     self.event_manager.Post(notification)
