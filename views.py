@@ -3,6 +3,7 @@ from events import TickEvent
 
 DIMENSIONS = (900, 1100)
 SQUARES_PER_ROW = 15
+# TODO Make tray wrap around for computer's dominos
 TRAY_HEIGHT = 200
 TILE_WIDTH = DIMENSIONS[0] // SQUARES_PER_ROW
 TILE_LENGTH = (DIMENSIONS[1] - TRAY_HEIGHT) // SQUARES_PER_ROW
@@ -17,6 +18,7 @@ class DominoSprite(pygame.sprite.Sprite):
         surface = pygame.Surface((TILE_WIDTH * 2, TILE_LENGTH))
         surface.fill(BLACK)
 
+        # TODO Make dots only appear if player's tiles
         self.draw_dots(surface, TILE_WIDTH, 0, values[0])
         self.draw_dots(surface, TILE_WIDTH, TILE_WIDTH, values[1])
 
@@ -72,39 +74,67 @@ class GameView:
 
         self.logo = pygame.image.load("domino.jpeg")
         self.screen = pygame.display.set_mode(DIMENSIONS)
+        self.background = pygame.Surface(DIMENSIONS)
 
         pygame.display.set_icon(self.logo)
         pygame.display.set_caption("Dominos")
 
-        self.sprites = pygame.sprite.RenderUpdates()
-        self.draw_background()
+        self.background.fill(WHITE)
 
         font = pygame.font.Font(None, 80)
         text = """Press SPACE BAR to begin"""
         text_img = font.render(text, 1, BLACK)
-        self.screen.blit(text_img, (120, 120))
+        self.background.blit(text_img, (120, 120))
+        self.screen.blit(self.background, (0,0))
         pygame.display.flip()
 
+        self.sprites = pygame.sprite.RenderUpdates()
 
-
-    def draw_background(self):
-        self.screen.fill(WHITE)
+    def draw_board(self):
+        self.sprites.clear(self.screen, self.background)
+        self.background.fill(WHITE)
         for x in range(0, SQUARES_PER_ROW):
             for y in range(0, SQUARES_PER_ROW):
                 if (x + y) % 2 == 0:
-                    pygame.draw.rect(self.screen, SILVER, [TILE_WIDTH * x, TILE_LENGTH * y, TILE_WIDTH, TILE_LENGTH]) 
+                    pygame.draw.rect(self.background, SILVER, [TILE_WIDTH * x, TILE_LENGTH * y, TILE_WIDTH, TILE_LENGTH]) 
         
         tray = [0, DIMENSIONS[1] - TRAY_HEIGHT, DIMENSIONS[0], TRAY_HEIGHT] 
-        pygame.draw.rect(self.screen, SLATE, tray)
-        
-        # TESTING SPRITE
-        # newSprite = DominoSprite(self.sprites, (0,6))
-        # self.screen.blit(newSprite.image, (450, 450))
+        pygame.draw.rect(self.background, SLATE, tray)
+        self.screen.blit(self.background, (0,0))
 
-        pygame.display.update()
+    def move_domino(self, domino):
+        # TODO Move domino according to mouse drag
+        return
+    
+    def place_domino(self, domino, game_map):
+        # TODO Place domino onto the appropriate tiles on the board
+        return
 
+    def rotate_domino(self, domino):
+        # TODO Rotate domino in tray clockwise 90 degrees
+        return
+
+    def game_over(self, game):
+        # TODO Render results, prompt player to hit spacebar to play again
+        return
 
     def Notify(self, event):
-        if isinstance(event, TickEvent):
+        if isinstance(event, TickEvent) :
+            # TODO Draw everything, but if game hasn't started, only draw the prompt 
             return
-        #     self.draw_background()
+
+        elif isinstance(event, GameStartEvent):
+            self.draw_board()
+            self.deal_hands(event.game.players)
+
+        elif isinstance(event, MoveDominoEvent):
+            self.move_domino(event.domino)
+        
+        elif isinstance(event, PlaceDominoEvent):
+            self.place_domino(event.domino, event.game_map)
+
+        elif isinstance(event, RotateDominoEvent):
+            self.rotate_domino(event.domino)
+
+        elif isinstance(event, GameOverEvent):
+            self.game_over(event.game)
