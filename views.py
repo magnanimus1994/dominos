@@ -1,12 +1,14 @@
 import pygame
-from events import TickEvent
+from events import * 
 
-DIMENSIONS = (900, 1100)
-SQUARES_PER_ROW = 15
-# TODO Make tray wrap around for computer's dominos
-TRAY_HEIGHT = 200
-TILE_WIDTH = DIMENSIONS[0] // SQUARES_PER_ROW
-TILE_LENGTH = (DIMENSIONS[1] - TRAY_HEIGHT) // SQUARES_PER_ROW
+# WINDOW
+DIMENSIONS = (1100, 1100)
+SECTORS_PER_ROW = 15
+TRAY_WIDTH = 200
+SECTOR_WIDTH = (DIMENSIONS[0] - TRAY_WIDTH) // SECTORS_PER_ROW
+SECTOR_LENGTH = (DIMENSIONS[1] - TRAY_WIDTH) // SECTORS_PER_ROW
+
+# COLORS
 BLACK = (0,0,0)
 SLATE = (112, 128, 144)
 WHITE = (255, 255, 255)
@@ -15,12 +17,12 @@ SILVER = (192, 192, 192)
 class DominoSprite(pygame.sprite.Sprite):
     def __init__(self, group=None, values = (6,6)):
         pygame.sprite.Sprite.__init__(self, group)
-        surface = pygame.Surface((TILE_WIDTH * 2, TILE_LENGTH))
+        surface = pygame.Surface((SECTOR_WIDTH * 2, SECTOR_LENGTH))
         surface.fill(BLACK)
 
         # TODO Make dots only appear if player's tiles
-        self.draw_dots(surface, TILE_WIDTH, 0, values[0])
-        self.draw_dots(surface, TILE_WIDTH, TILE_WIDTH, values[1])
+        self.draw_dots(surface, SECTOR_WIDTH, 0, values[0])
+        self.draw_dots(surface, SECTOR_WIDTH, SECTOR_WIDTH, values[1])
 
         self.image = surface
         self.rect = surface.get_rect()
@@ -79,7 +81,7 @@ class GameView:
         pygame.display.set_icon(self.logo)
         pygame.display.set_caption("Dominos")
 
-        self.background.fill(WHITE)
+        self.draw_board()
 
         font = pygame.font.Font(None, 80)
         text = """Press SPACE BAR to begin"""
@@ -91,15 +93,16 @@ class GameView:
         self.sprites = pygame.sprite.RenderUpdates()
 
     def draw_board(self):
-        self.sprites.clear(self.screen, self.background)
-        self.background.fill(WHITE)
-        for x in range(0, SQUARES_PER_ROW):
-            for y in range(0, SQUARES_PER_ROW):
+        # self.sprites.clear(self.screen, self.background)
+        self.background.fill(SLATE)
+        board = [0, 0, DIMENSIONS[0] - TRAY_WIDTH, DIMENSIONS[1] - TRAY_WIDTH] 
+        pygame.draw.rect(self.background, WHITE, board)
+
+        for x in range(0, SECTORS_PER_ROW):
+            for y in range(0, SECTORS_PER_ROW):
                 if (x + y) % 2 == 0:
-                    pygame.draw.rect(self.background, SILVER, [TILE_WIDTH * x, TILE_LENGTH * y, TILE_WIDTH, TILE_LENGTH]) 
+                    pygame.draw.rect(self.background, SILVER, [SECTOR_WIDTH * x, SECTOR_LENGTH * y, SECTOR_WIDTH, SECTOR_LENGTH]) 
         
-        tray = [0, DIMENSIONS[1] - TRAY_HEIGHT, DIMENSIONS[0], TRAY_HEIGHT] 
-        pygame.draw.rect(self.background, SLATE, tray)
         self.screen.blit(self.background, (0,0))
 
     def move_domino(self, domino):

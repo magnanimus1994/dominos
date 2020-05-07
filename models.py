@@ -61,7 +61,7 @@ class Domino:
         self.values = values
         self.orientation = Domino.HORIZONTAL
     
-    def rotate(self)
+    def rotate(self):
         if self.orientation == Domino.VERTICAL:
             self.values = (self.values[1], self.values[0])
         self.orientation = Domino.VERTICAL if self.orientation == Domino.HORIZONTAL else DOMINO.HORIZONTAL
