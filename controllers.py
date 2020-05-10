@@ -16,7 +16,7 @@ class CPUController:
         if isinstance(event, QuitEvent):
             self.running = 0
 
-class MouseController:
+class InputController:
 
     def __init__(self, event_manager):
         self.event_manager = event_manager
@@ -28,6 +28,7 @@ class MouseController:
                 notification = None
                 if event.type == pygame.QUIT:
                     notification = QuitEvent()
-
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    notification = GameStartRequest()
                 if notification:
                     self.event_manager.Post(notification)

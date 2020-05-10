@@ -10,6 +10,10 @@ class QuitEvent(Event):
     def __init__(self):
         self.name = "Program Quit Event"
 
+class GameStartRequest(Event):
+    def __init__(self):
+        self.name = "Game Start Request"
+
 class GameStartEvent(Event):
     def __init__(self, game):
         self.name = "Game Start Event"
