@@ -7,7 +7,7 @@ def main():
     event_manager = EventManager()
 
     cpu_controller = CPUController(event_manager)
-    mouse_controller = MouseController(event_manager)
+    mouse_controller = InputController(event_manager)
     view = GameView(event_manager)
     game = Game(event_manager)
 

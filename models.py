@@ -1,51 +1,117 @@
 import random
-from events import TickEvent
+from events import *
+
+ABOVE = 0
+RIGHT = 1
+BELOW = 2
+LEFT = 3
 
 class Game:
     
+    WAITING = 'waiting'
+    SETTING_UP = 'setting up'
+    RUNNING = 'running'
+    ENDED = 'ended'
+
     def __init__(self, event_manager):
+
         self.event_manager = event_manager
         self.event_manager.RegisterListener(self)
-        self.players = []
 
-    def deal_tiles(self):
-        tiles = []
+        self.state = Game.WAITING
+
+        self.map = Map(self.event_manager) 
+
+        self.players = []
+        self.deal_hands()
+        self.winner = None
+
+    def deal_hands(self):
+        dominos = []
         for i in range(0,7):
             for j in range(i,7):
-                tiles.append(Tile(self.event_manager, (i,j)))
-        random.shuffle(tiles)
-        self.players.append(Player(self.event_manager, tiles[:len(tiles)//2], True)) 
-        self.players.append(Player(self.event_manager, tiles[len(tiles)//2:], False))
+                dominos.append(Domino(self.event_manager, (i,j)))
+        random.shuffle(dominos)
+        self.players.append(Player(self.event_manager, dominos[:len(dominos)//2], True)) 
+        self.players.append(Player(self.event_manager, dominos[len(dominos)//2:], False))
+
+    def is_game_over(self):
+        # TODO check if either players can move
+        return false
 
     def Notify(self, event):
-        if isinstance(event, TickEvent):
-            return
+        if isinstance(event, GameStartRequest) and self.state == Game.WAITING:
+            self.state = Game.SETTING_UP
+            self.event_manager.Post(GameStartEvent(self))
+            self.state = Game.RUNNING
 
+
+class Map:
+    def __init__(self, event_manager):
+        self.sectors = []
+        self.event_manager = event_manager
+
+    def Build(self, sectors_per_row):
+        for row in range(sectors_per_row):
+            for column in range(sectors_per_row):
+                self.sectors.append(Sector(self.event_manager, (row, column)))
+        
+        for sector in self.sectors:
+            x = sector.coordinates[0]
+            y = sector.coordinates[1]
+            sector.neighbors[ABOVE] = None if y == 0 else self.sectors[((sectors_per_row * y) - 1) + x]
+            sector.neighbors[RIGHT] = None if x == sectors_per_row - 1 else self.sectors[(sectors_per_row * y) + x + 1]
+            sector.neighbors[BELOW] = None if y == sectors_per_row - 1 else self.sectors[((sectors_per_row * y) + 1) + x]
+            sector.neighbors[LEFT] = None if y == 0 else self.sectors[(sectors_per_row * y) + x - 1]
+
+           
+
+class Sector:
+    def __init__(self, event_manager, coordinates):
+        self.coordinates = coordinates
+        self.neighbors = [None] * 4
+        self.event_manager = event_manager
 
 class Player:
 
-    def __init__(self, event_manager, tiles, human):
+    def __init__(self, event_manager, dominos, human):
         self.event_manager = event_manager
         self.event_manager.RegisterListener(self)
 
-        self.tiles = tiles
+        self.dominos = dominos
         self.human = human
 
+        self.has_next_move = False
+
     def Notify(self, event):
-        if isinstance(event, TickEvent):
-            return
+        return
+        # if isinstance(event, NextTurnEvent):
+            # TODO set has_next_move to opposite. Post another event? 
+            # return
 
 
-class Tile:
+class Domino:
+
+    VERTICAL = 'vertical'
+    HORIZONTAL = 'horizontal'
 
     def __init__(self, event_manager, values):
         self.event_manager = event_manager
         self.event_manager.RegisterListener(self)
-
         self.values = values
+        self.orientation = Domino.HORIZONTAL
+        self.sector = None
+    
+    def rotate(self):
+        if self.orientation == Domino.VERTICAL:
+            self.values = (self.values[1], self.values[0])
+        self.orientation = Domino.VERTICAL if self.orientation == Domino.HORIZONTAL else DOMINO.HORIZONTAL
 
     def Notify(self, event):
         if isinstance(event, TickEvent):
             return
-
+        
+        elif isinstance(event, RotateDominoEvent):
+            self.rotate()
+            # TODO This will make all dominos rotate. Need to move it one layer above 
 
