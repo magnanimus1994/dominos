@@ -5,8 +5,12 @@ from events import *
 DIMENSIONS = (1100, 1100)
 SECTORS_PER_ROW = 15
 TRAY_WIDTH = 200
-SECTOR_WIDTH = (DIMENSIONS[0] - TRAY_WIDTH) // SECTORS_PER_ROW
-SECTOR_LENGTH = (DIMENSIONS[1] - TRAY_WIDTH) // SECTORS_PER_ROW
+
+# BOARD
+BOARD_WIDTH = DIMENSIONS[0] - TRAY_WIDTH
+BOARD_LENGTH = DIMENSIONS[1] - TRAY_WIDTH
+SECTOR_WIDTH =  BOARD_WIDTH // SECTORS_PER_ROW
+SECTOR_LENGTH = BOARD_LENGTH // SECTORS_PER_ROW
 
 # COLORS
 BLACK = (0,0,0)
@@ -25,17 +29,19 @@ class SectorSprite(pygame.sprite.Sprite):
         self.image = surface
 
 class DominoSprite(pygame.sprite.Sprite):
-    def __init__(self, values, group=None):
+    def __init__(self, values, human, group=None):
         pygame.sprite.Sprite.__init__(self, group)
+        
+        self.values = values
+
         surface = pygame.Surface((SECTOR_WIDTH * 2, SECTOR_LENGTH))
         surface.fill(BLACK)
 
-        # TODO Make dots only appear if player's tiles
-        self.draw_dots(surface, SECTOR_WIDTH, 0, values[0])
-        self.draw_dots(surface, SECTOR_WIDTH, SECTOR_WIDTH, values[1])
+        if human:
+            self.draw_dots(surface, SECTOR_WIDTH, 0, values[0])
+            self.draw_dots(surface, SECTOR_WIDTH, SECTOR_WIDTH, values[1])
 
         self.image = surface
-        self.rect = surface.get_rect()
 
     def draw_dots(self, surface, width, origin, n):
         radius = width // 10
@@ -116,8 +122,19 @@ class GameView:
             sprite.rect = pygame.Rect((sector.coordinates[0] * SECTOR_WIDTH, sector.coordinates[1] * SECTOR_LENGTH, SECTOR_WIDTH, SECTOR_LENGTH))
         
     def deal_hands(self, players):
-        # TODO Put dominos in tray
-        return
+        for player in players:
+            if player.human:
+                for i, domino in enumerate(player.dominos):
+                    sprite = DominoSprite(domino.values, True, self.frontSprites)
+                    sprite.rect = pygame.Rect((\
+                        (8 + ((i % 7) * ((SECTOR_WIDTH * 2) + 8))),\
+                        (BOARD_LENGTH + 20 + ((i % 2) * (20 + SECTOR_LENGTH))),\
+                        SECTOR_WIDTH * 2,\
+                        SECTOR_LENGTH\
+                    ))
+
+            # TODO Deal computer pieces
+                
 
     def move_domino(self, domino):
         # TODO Move domino according to mouse drag
