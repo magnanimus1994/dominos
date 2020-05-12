@@ -29,56 +29,58 @@ class SectorSprite(pygame.sprite.Sprite):
         self.image = surface
 
 class DominoSprite(pygame.sprite.Sprite):
-    def __init__(self, values, human, group=None):
+    def __init__(self, domino, group=None):
         pygame.sprite.Sprite.__init__(self, group)
         
-        self.values = values
+        self.domino = domino
 
-        surface = pygame.Surface((SECTOR_WIDTH * 2, SECTOR_LENGTH))
+        surfDimensions = (SECTOR_WIDTH * 2, SECTOR_LENGTH) if domino.orientation == 'horizontal' else (SECTOR_WIDTH, SECTOR_LENGTH * 2)
+        surface = pygame.Surface(surfDimensions)
         surface.fill(BLACK)
 
-        if human:
-            self.draw_dots(surface, SECTOR_WIDTH, 0, values[0])
-            self.draw_dots(surface, SECTOR_WIDTH, SECTOR_WIDTH, values[1])
+        if self.domino.human:
+            self.draw_dots(surface, 0, self.domino.values[0])
+            self.draw_dots(surface, SECTOR_WIDTH, self.domino.values[1])
+            pygame.draw.line(surface, WHITE, (SECTOR_WIDTH,0 ), (SECTOR_WIDTH, SECTOR_LENGTH))
 
         self.image = surface
 
-    def draw_dots(self, surface, width, origin, n):
-        radius = width // 10
+    def draw_dots(self, surface, origin, n):
+        radius = SECTOR_WIDTH // 10
         if n==0:
             return
         elif n==1:
-            pygame.draw.circle(surface, WHITE, (origin + (width // 2), width // 2), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 2), SECTOR_WIDTH // 2), radius)
             return
         elif n==2:
-            pygame.draw.circle(surface, WHITE, (origin + (width // 4), 3 * width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (3 * width // 4), width // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
             return
         elif n==3:
-            pygame.draw.circle(surface, WHITE, (origin + (width // 4), 3 * width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (width // 2), width // 2), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (3 * width // 4), width // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 2), SECTOR_WIDTH // 2), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
             return
         elif n==4:
-            pygame.draw.circle(surface, WHITE, (origin + (width // 4), width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (width // 4), 3 * width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (3 * width // 4), width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (3 * width // 4), 3 * width // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
             return
         elif n==5:
-            pygame.draw.circle(surface, WHITE, (origin + (width // 4), width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (width // 4), 3 * width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (3 * width // 4), width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (3 * width // 4), 3 * width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (width // 2), width // 2), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 2), SECTOR_WIDTH // 2), radius)
             return
         elif n==6:
-            pygame.draw.circle(surface, WHITE, (origin + (width // 3), width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (2 * width // 3), width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (width // 3), 2 * width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (2 * width // 3), 2 * width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (width // 3), 3 * width // 4), radius)
-            pygame.draw.circle(surface, WHITE, (origin + (2 * width // 3), 3 * width // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 3), SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (2 * SECTOR_WIDTH // 3), SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 3), 2 * SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (2 * SECTOR_WIDTH // 3), 2 * SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 3), 3 * SECTOR_WIDTH // 4), radius)
+            pygame.draw.circle(surface, WHITE, (origin + (2 * SECTOR_WIDTH // 3), 3 * SECTOR_WIDTH // 4), radius)
             return
 
 
@@ -125,15 +127,24 @@ class GameView:
         for player in players:
             if player.human:
                 for i, domino in enumerate(player.dominos):
-                    sprite = DominoSprite(domino.values, True, self.frontSprites)
+                    sprite = DominoSprite(domino, self.frontSprites)
                     sprite.rect = pygame.Rect((\
                         (8 + ((i % 7) * ((SECTOR_WIDTH * 2) + 8))),\
                         (BOARD_LENGTH + 20 + ((i % 2) * (20 + SECTOR_LENGTH))),\
                         SECTOR_WIDTH * 2,\
                         SECTOR_LENGTH\
                     ))
+            else:
+                for i, domino in enumerate(player.dominos):
+                    domino.rotate()
+                    sprite = DominoSprite(domino, self.frontSprites)
+                    sprite.rect = pygame.Rect((\
+                        (BOARD_WIDTH + 20 + ((i % 2) * (SECTOR_WIDTH + 20))),\
+                        (8 + ((i % 7) * (8 + SECTOR_LENGTH * 2))),\
+                        SECTOR_WIDTH,\
+                        SECTOR_LENGTH * 2\
+                    ))
 
-            # TODO Deal computer pieces
                 
 
     def move_domino(self, domino):

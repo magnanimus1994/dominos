@@ -34,6 +34,8 @@ class Game:
         random.shuffle(dominos)
         self.players.append(Player(self.event_manager, dominos[:len(dominos)//2], True)) 
         self.players.append(Player(self.event_manager, dominos[len(dominos)//2:], False))
+        for domino in self.players[1].dominos:
+            domino.human = False
 
     def is_game_over(self):
         # TODO check if either players can move
@@ -101,6 +103,7 @@ class Domino:
         self.values = values
         self.orientation = Domino.HORIZONTAL
         self.sector = None
+        self.human = True
     
     def rotate(self):
         if self.orientation == Domino.VERTICAL:
