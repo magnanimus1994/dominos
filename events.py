@@ -19,20 +19,20 @@ class GameStartEvent(Event):
         self.name = "Game Start Event"
         self.game = game
 
-class NextMoveEvent(Event):
-    def __init__(self, players):
-        self.name = "Next Move Event"
-        self.players = players
+class LeftClickEvent(Event):
+    def __init__(self, pos):
+        self.name = "Left Click Event"
+        self.pos = pos
 
-class RotateDominoEvent(Event):
-    def __init__(self, domino):
-        self.name = "Rotate Domino Event"
-        self.domino = domino
+class MouseDragEvent(Event):
+    def __init__(self, pos):
+        self.name = "Mouse Drag Event"
+        self.pos = pos
 
-class MoveDominoEvent(Event):
-    def __init__(self, domino):
-        self.name = "Move Domino Event"
-        self.domino = domino
+class ReleaseMouseEvent(Event):
+     def __init__(self, pos):
+        self.name = "Mouse Drag Event"
+        self.pos = pos
 
 class PlaceDominoRequest(Event):
     def __init__(self, domino, game_map):

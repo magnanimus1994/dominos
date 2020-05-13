@@ -114,7 +114,7 @@ class Domino:
         if isinstance(event, TickEvent):
             return
         
-        elif isinstance(event, RotateDominoEvent):
-            self.rotate()
-            # TODO This will make all dominos rotate. Need to move it one layer above 
+       #  elif isinstance(event, RotateDominoEvent):
+       #      self.rotate()
+       #      TODO This will make all dominos rotate. Need to move it one layer above 
 

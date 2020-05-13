@@ -21,6 +21,7 @@ class InputController:
     def __init__(self, event_manager):
         self.event_manager = event_manager
         self.event_manager.RegisterListener(self)
+        self.dragging = False
 
     def Notify(self, event):
         if isinstance(event, TickEvent):
@@ -30,5 +31,15 @@ class InputController:
                     notification = QuitEvent()
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     notification = GameStartRequest()
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    self.dragging = True
+                    notification = LeftClickEvent(event.pos)
+                elif event.type == pygame.MOUSEMOTION and self.dragging:
+                    notification = MouseDragEvent(event.pos)
+                elif event.type == pygame.MOUSEBUTTONUP and self.dragging and event.button == 1:
+                    notification = ReleaseMouseEvent(event.pos)
                 if notification:
                     self.event_manager.Post(notification)
+
+
+

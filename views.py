@@ -116,6 +116,10 @@ class GameView:
         self.backSprites = pygame.sprite.RenderUpdates()
         self.frontSprites = pygame.sprite.RenderUpdates()
 
+        self.selected_domino = None
+        self.drag_start_x = None
+        self.drag_start_y = None
+
     def draw_board(self, game_map):
         # self.sprites.clear(self.screen, self.background)
         self.screen.blit(self.background, (0,0))
@@ -146,19 +150,6 @@ class GameView:
                     ))
 
                 
-
-    def move_domino(self, domino):
-        # TODO Move domino according to mouse drag
-        return
-    
-    def place_domino(self, domino, game_map):
-        # TODO Place domino onto the appropriate tiles on the board
-        return
-
-    def rotate_domino(self, domino):
-        # TODO Rotate domino in tray clockwise 90 degrees
-        return
-
     def game_over(self, game):
         # TODO Render results, prompt player to hit spacebar to play again
         return
@@ -185,14 +176,31 @@ class GameView:
             self.deal_hands(event.game.players)
             self.state = GameView.RUNNING
 
-        elif isinstance(event, MoveDominoEvent):
-            self.move_domino(event.domino)
+        elif isinstance(event, LeftClickEvent):
+            for sprite in self.frontSprites:
+                if sprite.rect.collidepoint(event.pos):
+                   self.selected_domino = sprite
+                   self.drag_start_x = sprite.rect[0]
+                   self.drag_start_y = sprite.rect[1]
+                   mouse_x, mouse_y, = event.pos
+                   sprite.rect.move(self.drag_start_x - mouse_x, self.drag_start_y - mouse_y)
         
-        elif isinstance(event, PlaceDominoEvent):
-            self.place_domino(event.domino, event.game_map)
+        elif isinstance(event, MouseDragEvent):
+            if self.selected_domino is not None:
+                mouse_x, mouse_y, = event.pos
+                self.selected_domino.rect.move(self.drag_start_x - mouse_x, self.drag_start_y - mouse_y)
 
-        elif isinstance(event, RotateDominoEvent):
-            self.rotate_domino(event.domino)
+        elif isinstance(event, ReleaseMouseEvent):
+            if self.selected_domino is not None:
+                for sprite in self.backSprites:
+                    if sprite.rect.collidepoint(event.pos):
+                        # TODO Check if move is legal
+                        self.selected_domino.rect.move(sprite.rect[0], sprite.rect[1])
+                    else:
+                        self.selected_domino.rect.move(self.drag_start_x, self.drag_start_y)
+                self.selected_domino = None
+                self.drag_start_x = None
+                self.drag_start_y = None
 
         elif isinstance(event, GameOverEvent):
             self.state = GameView.ENDED
