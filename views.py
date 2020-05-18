@@ -220,7 +220,16 @@ class GameView:
                 self.event_manager.Post(notification)
 
         elif isinstance(event, PlaceDominoEvent):
-            # TODO Place Domino
+            if event.domino.values == (6,6):
+                for sprite in self.frontSprites:
+                    if sprite.domino.values == (6,6):
+                        # TODO This doesn't work. Have to set the coordinates based on the sector
+                        sprite.rect.x = event.domino.alpha_sector.x
+                        sprite.rect.y = event.domino.alpha_sector.y
+                        break
+            else:
+                self.selected_domino.sector.rect.x = event.domino.alpha_sector.x
+                self.selected_domino.sector.rect.y = event.domino.alpha_sector.y
             self.deselect_domino()
 
         elif isinstance(event, RejectPlacementEvent):

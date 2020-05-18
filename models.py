@@ -59,11 +59,14 @@ class Game:
             notification = None
             if event.domino.values == (6,6):
                 notification = PlaceDominoEvent(event.domino)
-                alpha_sector = event.sector # Make sure this is 
+                notification.domino.alpha_sector = event.sector 
+                notification.domino.omega_sector = event.sector.neighbors[RIGHT]\
+                    if event.domino.orientation == Domino.HORIZONTAL\
+                    else event.sector.neighbors[BELOW]
                 self.end_dominos.append(event.domino)
             else:
                 for i, open_domino in enumerate(self.end_dominos):
-                    if event.sector in open_domino.neighbors and open_domino.values[1] in event.domino.values: 
+                    if event.sector in open_domino.omega_sector.neighbors and open_domino.values[1] in event.domino.values: 
                         if event.domino.values[0] != open_domino.values[1]:
                             notification = PlaceDominoEvent(event.domino, True)
                             for _ in range(2):
@@ -75,13 +78,16 @@ class Game:
                             if open_domino.orientation == Domino.Horizontal\
                             else open_domino.neighbors[BELOW]
                         
-                        notification.domino.beta_sector = notification.domino.alpha_sector.neighbors[RIGHT]\
+                        notification.domino.omega_sector = notification.domino.alpha_sector.neighbors[RIGHT]\
                             if notification.domino.orientation == Domino.HORIZONTAL\
                             else notification.domino.alpha_sector.neighbors[BELOW]
                         
                         if len(self.end_dominos) > 1:
                             self.end_dominos[i] = event.domino
                         else:
+                            new_omega = self.end_dominos[0].alpha_sector
+                            self.end_dominos[0].alpha_sector = self.end_dominos[0].omega_sector
+                            self.end_dominos[0].omega_secotr = new_omega
                             self.end_dominos.append(event.domino)
                         break
 
@@ -145,7 +151,7 @@ class Domino:
         self.orientation = Domino.HORIZONTAL
         self.human = True
         self.alpha_sector = None
-        self.beta_sector = None
+        self.omega_sector = None
 
     def rotate(self):
         if self.orientation == Domino.VERTICAL:
