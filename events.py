@@ -41,10 +41,9 @@ class PlaceDominoRequest(Event):
         self.sector = sector
 
 class PlaceDominoEvent(Event):
-    def __init__(self, domino, sector, rotate=False):
+    def __init__(self, domino, rotate=False):
         self.name = "Place Domino Event"
         self.domino = domino
-        self.sector = sector
         self.rotate = rotate
 
 class RejectPlacementEvent(Event):

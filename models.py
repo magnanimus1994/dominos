@@ -48,12 +48,43 @@ class Game:
             self.state = Game.SETTING_UP
             self.event_manager.Post(GameStartEvent(self))
             self.state = Game.RUNNING
+            for player in self.players:
+                for domino in player.dominos:
+                    if domino.values == (6,6):
+                        player.to_move = False
+                        self.event_manager.Post(PlaceDominoRequest(domino, self.map.sectors[len(self.map.sectors) // 2]))
+                        break
 
         elif isinstance(event, PlaceDominoRequest):
             notification = None
-            #for end_domino in self.end_dominos:
-            #    if event.domino.sector in end_domino.playable_sectors 
-                
+            if event.domino.values == (6,6):
+                notification = PlaceDominoEvent(event.domino)
+                alpha_sector = event.sector # Make sure this is 
+                self.end_dominos.append(event.domino)
+            else:
+                for i, open_domino in enumerate(self.end_dominos):
+                    if event.sector in open_domino.neighbors and open_domino.values[1] in event.domino.values: 
+                        if event.domino.values[0] != open_domino.values[1]:
+                            notification = PlaceDominoEvent(event.domino, True)
+                            for _ in range(2):
+                                event.domino.rotate()
+                        else:
+                            notification = PlaceDominoEvent(event.domino)
+                        
+                        notification.domino.alpha_sector = open_domino.neighbors[RIGHT]\
+                            if open_domino.orientation == Domino.Horizontal\
+                            else open_domino.neighbors[BELOW]
+                        
+                        notification.domino.beta_sector = notification.domino.alpha_sector.neighbors[RIGHT]\
+                            if notification.domino.orientation == Domino.HORIZONTAL\
+                            else notification.domino.alpha_sector.neighbors[BELOW]
+                        
+                        if len(self.end_dominos) > 1:
+                            self.end_dominos[i] = event.domino
+                        else:
+                            self.end_dominos.append(event.domino)
+                        break
+
             if notification is None:
                 notification = RejectPlacementEvent()
             self.event_manager.Post(notification)
@@ -93,7 +124,7 @@ class Player:
         self.dominos = dominos
         self.human = human
 
-        self.to_move = False
+        self.to_move = True
 
     def Notify(self, event):
         return
@@ -112,10 +143,9 @@ class Domino:
         self.event_manager.RegisterListener(self)
         self.values = values
         self.orientation = Domino.HORIZONTAL
-        self.playable_value = None
-        self.playable_sectors = [] 
         self.human = True
-        self.played = False
+        self.alpha_sector = None
+        self.beta_sector = None
 
     def rotate(self):
         if self.orientation == Domino.VERTICAL:
