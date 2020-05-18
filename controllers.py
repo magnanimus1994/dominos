@@ -34,10 +34,11 @@ class InputController:
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.dragging = True
                     notification = LeftClickEvent(event.pos)
+                elif event.type == pygame.MOUSEBUTTONUP and self.dragging and event.button == 1:
+                    self.dragging = False
+                    notification = ReleaseMouseEvent(event.pos)
                 elif event.type == pygame.MOUSEMOTION and self.dragging:
                     notification = MouseDragEvent(event.pos)
-                elif event.type == pygame.MOUSEBUTTONUP and self.dragging and event.button == 1:
-                    notification = ReleaseMouseEvent(event.pos)
                 if notification:
                     self.event_manager.Post(notification)
 

@@ -2,8 +2,8 @@ import pygame
 from events import * 
 
 # WINDOW
-DIMENSIONS = (1100, 1100)
-SECTORS_PER_ROW = 15
+DIMENSIONS = (1300, 1300)
+SECTORS_PER_ROW = 20
 TRAY_WIDTH = 200
 
 # BOARD
@@ -119,6 +119,8 @@ class GameView:
         self.selected_domino = None
         self.drag_start_x = None
         self.drag_start_y = None
+        self.drag_offset_x = None
+        self.drag_offset_y = None
 
     def draw_board(self, game_map):
         # self.sprites.clear(self.screen, self.background)
@@ -183,24 +185,32 @@ class GameView:
                    self.drag_start_x = sprite.rect[0]
                    self.drag_start_y = sprite.rect[1]
                    mouse_x, mouse_y, = event.pos
-                   sprite.rect.move(self.drag_start_x - mouse_x, self.drag_start_y - mouse_y)
+                   self.drag_offset_x = self.drag_start_x - mouse_x
+                   self.drag_offset_y = self.drag_start_y - mouse_y
         
         elif isinstance(event, MouseDragEvent):
             if self.selected_domino is not None:
                 mouse_x, mouse_y, = event.pos
-                self.selected_domino.rect.move(self.drag_start_x - mouse_x, self.drag_start_y - mouse_y)
+                self.selected_domino.rect.x = mouse_x + self.drag_offset_x
+                self.selected_domino.rect.y = mouse_y + self.drag_offset_y
 
         elif isinstance(event, ReleaseMouseEvent):
             if self.selected_domino is not None:
                 for sprite in self.backSprites:
                     if sprite.rect.collidepoint(event.pos):
                         # TODO Check if move is legal
-                        self.selected_domino.rect.move(sprite.rect[0], sprite.rect[1])
+                        self.selected_domino.rect.x = sprite.rect.x 
+                        self.selected_domino.rect.y = sprite.rect.y
+                        break
                     else:
-                        self.selected_domino.rect.move(self.drag_start_x, self.drag_start_y)
-                self.selected_domino = None
-                self.drag_start_x = None
-                self.drag_start_y = None
+                        self.selected_domino.rect.x = self.drag_start_x
+                        self.selected_domino.rect.y = self.drag_start_y
+
+            self.selected_domino = None
+            self.drag_start_x = None
+            self.drag_start_y = None
+            self.drag_offset_x = None
+            self.drag_offset_y = None
 
         elif isinstance(event, GameOverEvent):
             self.state = GameView.ENDED
