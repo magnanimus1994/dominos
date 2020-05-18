@@ -35,18 +35,23 @@ class ReleaseMouseEvent(Event):
         self.pos = pos
 
 class PlaceDominoRequest(Event):
-    def __init__(self, domino, game_map):
+    def __init__(self, domino, sector):
         self.name = "Place Domino Request"
         self.domino = domino
-        self.game_map = game_map
+        self.sector = sector
 
 class PlaceDominoEvent(Event):
-    def __init__(self, domino, game_map):
+    def __init__(self, domino, sector, rotate=False):
         self.name = "Place Domino Event"
         self.domino = domino
-        self.game_map = game_map
+        self.sector = sector
+        self.rotate = rotate
+
+class RejectPlacementEvent(Event):
+    def __init__(self):
+        self.name = "Reject Placement Event"
 
 class GameOverEvent(Event):
-    def __init_(self, game):
+    def __init__(self, game):
         self.name = "Game Over Event"
         self.game = game 

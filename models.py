@@ -24,6 +24,8 @@ class Game:
 
         self.players = []
         self.deal_hands()
+        self.end_dominos = []
+
         self.winner = None
 
     def deal_hands(self):
@@ -47,6 +49,14 @@ class Game:
             self.event_manager.Post(GameStartEvent(self))
             self.state = Game.RUNNING
 
+        elif isinstance(event, PlaceDominoRequest):
+            notification = None
+            #for end_domino in self.end_dominos:
+            #    if event.domino.sector in end_domino.playable_sectors 
+                
+            if notification is None:
+                notification = RejectPlacementEvent()
+            self.event_manager.Post(notification)
 
 class Map:
     def __init__(self, event_manager):
@@ -83,7 +93,7 @@ class Player:
         self.dominos = dominos
         self.human = human
 
-        self.has_next_move = False
+        self.to_move = False
 
     def Notify(self, event):
         return
@@ -102,19 +112,18 @@ class Domino:
         self.event_manager.RegisterListener(self)
         self.values = values
         self.orientation = Domino.HORIZONTAL
-        self.sector = None
+        self.playable_value = None
+        self.playable_sectors = [] 
         self.human = True
-    
+        self.played = False
+
     def rotate(self):
         if self.orientation == Domino.VERTICAL:
             self.values = (self.values[1], self.values[0])
         self.orientation = Domino.VERTICAL if self.orientation == Domino.HORIZONTAL else DOMINO.HORIZONTAL
-
+    
     def Notify(self, event):
         if isinstance(event, TickEvent):
             return
         
-       #  elif isinstance(event, RotateDominoEvent):
-       #      self.rotate()
-       #      TODO This will make all dominos rotate. Need to move it one layer above 
 

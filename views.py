@@ -3,7 +3,7 @@ from events import *
 
 # WINDOW
 DIMENSIONS = (1300, 1300)
-SECTORS_PER_ROW = 20
+SECTORS_PER_ROW = 24
 TRAY_WIDTH = 200
 
 # BOARD
@@ -121,6 +121,7 @@ class GameView:
         self.drag_start_y = None
         self.drag_offset_x = None
         self.drag_offset_y = None
+        self.destination = None
 
     def draw_board(self, game_map):
         # self.sprites.clear(self.screen, self.background)
@@ -155,6 +156,18 @@ class GameView:
     def game_over(self, game):
         # TODO Render results, prompt player to hit spacebar to play again
         return
+
+    def return_to_tray(self):
+        self.selected_domino.rect.x = self.drag_start_x
+        self.selected_domino.rect.y = self.drag_start_y
+
+    def deselect_domino(self):
+        self.selected_domino = None
+        self.drag_start_x = None
+        self.drag_start_y = None
+        self.drag_offset_x = None
+        self.drag_offset_y = None
+        self.destination = None
 
     def Notify(self, event):
         if isinstance(event, TickEvent):
@@ -196,21 +209,23 @@ class GameView:
 
         elif isinstance(event, ReleaseMouseEvent):
             if self.selected_domino is not None:
+                notification = None
                 for sprite in self.backSprites:
                     if sprite.rect.collidepoint(event.pos):
-                        # TODO Check if move is legal
-                        self.selected_domino.rect.x = sprite.rect.x 
-                        self.selected_domino.rect.y = sprite.rect.y
+                        self.destination = sprite
+                        notification = PlaceDominoRequest(self.selected_domino.domino, sprite.sector)
                         break
-                    else:
-                        self.selected_domino.rect.x = self.drag_start_x
-                        self.selected_domino.rect.y = self.drag_start_y
+                if notification is None:
+                    notification = RejectPlacementEvent()    
+                self.event_manager.Post(notification)
 
-            self.selected_domino = None
-            self.drag_start_x = None
-            self.drag_start_y = None
-            self.drag_offset_x = None
-            self.drag_offset_y = None
+        elif isinstance(event, PlaceDominoEvent):
+            # TODO Place Domino
+            self.deselect_domino()
+
+        elif isinstance(event, RejectPlacementEvent):
+            self.return_to_tray()
+            self.deselect_domino()
 
         elif isinstance(event, GameOverEvent):
             self.state = GameView.ENDED
