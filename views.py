@@ -29,51 +29,44 @@ class SectorSprite(pygame.sprite.Sprite):
         self.image = surface
 
 class DominoSprite(pygame.sprite.Sprite):
-    def __init__(self, domino, group=None):
+    def __init__(self, domino, group=None, face_up=True):
         pygame.sprite.Sprite.__init__(self, group)
         
         self.domino = domino
 
-        surfDimensions = (SECTOR_WIDTH * 2, SECTOR_LENGTH) if domino.orientation == 'horizontal' else (SECTOR_WIDTH, SECTOR_LENGTH * 2)
+        surfDimensions = (SECTOR_WIDTH * 2, SECTOR_LENGTH) 
         surface = pygame.Surface(surfDimensions)
         surface.fill(BLACK)
 
-        if self.domino.human:
+        if face_up:
             self.draw_dots(surface, 0, self.domino.values[0])
             self.draw_dots(surface, SECTOR_WIDTH, self.domino.values[1])
-            pygame.draw.line(surface, WHITE, (SECTOR_WIDTH,0 ), (SECTOR_WIDTH, SECTOR_LENGTH))
+            pygame.draw.line(surface, WHITE, (SECTOR_WIDTH,0), (SECTOR_WIDTH, SECTOR_LENGTH))
 
         self.image = surface
 
     def draw_dots(self, surface, origin, n):
         radius = SECTOR_WIDTH // 10
-        if n==0:
-            return
-        elif n==1:
+        if n==1:
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 2), SECTOR_WIDTH // 2), radius)
-            return
         elif n==2:
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
-            return
         elif n==3:
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 2), SECTOR_WIDTH // 2), radius)
             pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
-            return
         elif n==4:
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
-            return
         elif n==5:
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (3 * SECTOR_WIDTH // 4), 3 * SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 2), SECTOR_WIDTH // 2), radius)
-            return
         elif n==6:
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 3), SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (2 * SECTOR_WIDTH // 3), SECTOR_WIDTH // 4), radius)
@@ -81,7 +74,6 @@ class DominoSprite(pygame.sprite.Sprite):
             pygame.draw.circle(surface, WHITE, (origin + (2 * SECTOR_WIDTH // 3), 2 * SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (SECTOR_WIDTH // 3), 3 * SECTOR_WIDTH // 4), radius)
             pygame.draw.circle(surface, WHITE, (origin + (2 * SECTOR_WIDTH // 3), 3 * SECTOR_WIDTH // 4), radius)
-            return
 
 
 class GameView:
@@ -121,7 +113,6 @@ class GameView:
         self.drag_start_y = None
         self.drag_offset_x = None
         self.drag_offset_y = None
-        self.destination = None
 
     def draw_board(self, game_map):
         # self.sprites.clear(self.screen, self.background)
@@ -143,8 +134,7 @@ class GameView:
                     ))
             else:
                 for i, domino in enumerate(player.dominos):
-                    domino.rotate()
-                    sprite = DominoSprite(domino, self.frontSprites)
+                    sprite = DominoSprite(domino, self.frontSprites, False)
                     sprite.rect = pygame.Rect((\
                         (BOARD_WIDTH + 20 + ((i % 2) * (SECTOR_WIDTH + 20))),\
                         (8 + ((i % 7) * (8 + SECTOR_LENGTH * 2))),\
@@ -167,7 +157,6 @@ class GameView:
         self.drag_start_y = None
         self.drag_offset_x = None
         self.drag_offset_y = None
-        self.destination = None
 
     def Notify(self, event):
         if isinstance(event, TickEvent):
@@ -212,7 +201,6 @@ class GameView:
                 notification = None
                 for sprite in self.backSprites:
                     if sprite.rect.collidepoint(event.pos):
-                        self.destination = sprite
                         notification = PlaceDominoRequest(self.selected_domino.domino, sprite.sector)
                         break
                 if notification is None:
@@ -220,16 +208,19 @@ class GameView:
                 self.event_manager.Post(notification)
 
         elif isinstance(event, PlaceDominoEvent):
-            if event.domino.values == (6,6):
-                for sprite in self.frontSprites:
-                    if sprite.domino.values == (6,6):
-                        # TODO This doesn't work. Have to set the coordinates based on the sector
-                        sprite.rect.x = event.domino.alpha_sector.x
-                        sprite.rect.y = event.domino.alpha_sector.y
-                        break
-            else:
-                self.selected_domino.sector.rect.x = event.domino.alpha_sector.x
-                self.selected_domino.sector.rect.y = event.domino.alpha_sector.y
+#             for frontSprite in self.frontSprites:
+#                 if frontSprite.domino.values == event.domino.values:
+#                     for backSprite in self.backSprites:
+#                         if backSprite.sector == event.domino.alpha_sector:
+#                             destination = backSprite
+#                             break
+#                     frontSprite.rect.x = destination.rect.x
+#                     frontSprite.rect.y = destination.rect.y
+#                     if not frontSprite.domino.human:
+#                         vertical = frontSprite.domino.orientation == 'vertical'
+#                         frontSprite.draw_dots(frontSprite.image, 0, frontSprite.domino.values[0], vertical)
+#                         frontSprite.draw_dots(frontSprite.image, SECTOR_WIDTH, frontSprite.domino.values[1], vertical)
+#                     break
             self.deselect_domino()
 
         elif isinstance(event, RejectPlacementEvent):
