@@ -141,7 +141,7 @@ class GameView:
                         SECTOR_WIDTH,\
                         SECTOR_LENGTH * 2\
                     ))
-
+                    sprite.image = pygame.transform.rotate(sprite.image, 90)
                 
     def game_over(self, game):
         # TODO Render results, prompt player to hit spacebar to play again
