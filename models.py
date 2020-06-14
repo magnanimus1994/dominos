@@ -1,4 +1,5 @@
 import random
+import math
 from events import *
 
 ABOVE = 0
@@ -51,8 +52,10 @@ class Game:
                 for domino in player.dominos:
                     if domino.values == (6,6):
                         player.to_move = False
-                        # TODO Reinstate when place domino event is working
-                        # self.event_manager.Post(PlaceDominoRequest(domino, self.map.sectors[len(self.map.sectors) // 2]))
+                        sector_count = len(self.map.sectors)
+                        self.event_manager.Post(PlaceDominoEvent(domino, self.map.sectors[\
+                            (sector_count // 2) + int(math.sqrt(sector_count) // 2)\
+                        ]))
                         break
 
         elif isinstance(event, PlaceDominoRequest):
@@ -61,6 +64,10 @@ class Game:
             if notification is None:
                 notification = RejectPlacementEvent()
             self.event_manager.Post(notification)
+
+        elif isinstance(event, PlaceDominoEvent):
+            #TODO update hot sectors and chain 
+            return
 
 class Map:
     def __init__(self, event_manager):
@@ -79,7 +86,6 @@ class Map:
             sector.neighbors[RIGHT] = None if x == sectors_per_row - 1 else self.sectors[(sectors_per_row * y) + x + 1]
             sector.neighbors[BELOW] = None if y == sectors_per_row - 1 else self.sectors[((sectors_per_row * y) + 1) + x]
             sector.neighbors[LEFT] = None if y == 0 else self.sectors[(sectors_per_row * y) + x - 1]
-           
 
 class Sector:
     def __init__(self, event_manager, coordinates):

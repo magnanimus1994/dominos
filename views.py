@@ -151,6 +151,17 @@ class GameView:
         self.selected_domino.rect.x = self.drag_start_x
         self.selected_domino.rect.y = self.drag_start_y
 
+    def place_domino(self, domino, sector_model):
+        for sprite in self.backSprites:
+            if sprite.sector == sector_model:
+                sector = sprite
+        domino.rect = pygame.Rect((\
+            sector.rect.x,\
+            sector.rect.y,\
+            domino.rect.width,\
+            domino.rect.height
+        ))
+
     def deselect_domino(self):
         self.selected_domino = None
         self.drag_start_x = None
@@ -208,19 +219,12 @@ class GameView:
                 self.event_manager.Post(notification)
 
         elif isinstance(event, PlaceDominoEvent):
-#             for frontSprite in self.frontSprites:
-#                 if frontSprite.domino.values == event.domino.values:
-#                     for backSprite in self.backSprites:
-#                         if backSprite.sector == event.domino.alpha_sector:
-#                             destination = backSprite
-#                             break
-#                     frontSprite.rect.x = destination.rect.x
-#                     frontSprite.rect.y = destination.rect.y
-#                     if not frontSprite.domino.human:
-#                         vertical = frontSprite.domino.orientation == 'vertical'
-#                         frontSprite.draw_dots(frontSprite.image, 0, frontSprite.domino.values[0], vertical)
-#                         frontSprite.draw_dots(frontSprite.image, SECTOR_WIDTH, frontSprite.domino.values[1], vertical)
-#                     break
+            if self.selected_domino is None:
+                for sprite in self.frontSprites:
+                    if sprite.domino == event.domino:
+                        self.place_domino(sprite, event.sector)
+            else:
+                self.place_domino(self.selected_domino, event.sector)
             self.deselect_domino()
 
         elif isinstance(event, RejectPlacementEvent):
